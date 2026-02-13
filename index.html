@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repmatch | The SaaS Sales Growth Engine</title>
+    
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Global Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        /* ROI Chart Dimensions */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin: auto;
+        }
+
+        /* Modal Backdrop */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        /* FAQ Accordion */
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 1000px;
+            opacity: 1;
+            padding-bottom: 1.5rem;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Scarcity Pulse Effect */
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .scarcity-pulse {
+            animation: pulse-red 2s infinite ease-in-out;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #D97706;
+            cursor: pointer;
+            margin-top: -7px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+        }
+
+        /* Transitions */
+        .quiz-step { display: none; }
+        .quiz-step.active { display: block; }
+
+        /* Calendar Embed Container */
+        .calendar-wrapper {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .roadmap-card {
+            transition: all 0.3s ease;
+        }
+        .roadmap-card:hover {
+            transform: translateY(-4px);
+            border-color: #D97706;
+        }
+
+        /* Quiz Specific Styling */
+        .quiz-option {
+            transition: all 0.2s ease;
+            border: 2px solid #F3F4F6;
+        }
+        .quiz-option:hover {
+            border-color: #D97706;
+            background-color: #FFFBEB;
+        }
+        .quiz-option input:checked + div {
+            color: #D97706;
+        }
+    </style>
+</head>
+<body class="bg-[#F9F9F7] text-gray-800 font-sans antialiased">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold tracking-tight text-gray-900">Repmatch<span class="text-amber-600">.</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#how-it-works" class="text-gray-500 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Onboarding</a>
+                    <a href="#roi-simulator" class="text-gray-500 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">ROI Simulator</a>
+                    <a href="#testimonials" class="text-gray-500 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Testimonials</a>
+                    <a href="#faq" class="text-gray-500 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">FAQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="hidden lg:block text-[10px] font-bold text-red-600 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">2 Spots Left</span>
+                    <button onclick="openBooking()" class="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-lg">Book Strategy Call</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="pt-20 pb-24 text-center px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-2 mb-8">
+                <div class="inline-flex items-center space-x-2 bg-amber-50 rounded-full px-4 py-1 border border-amber-100">
+                    <span class="text-amber-600 text-xs font-bold uppercase tracking-wider">Performance-First</span>
+                    <span class="text-amber-800 text-sm font-medium">Zero upfront salary</span>
+                </div>
+                <div class="inline-flex items-center space-x-2 bg-red-50 rounded-full px-4 py-1 border border-red-100 scarcity-pulse">
+                    <span class="flex h-2 w-2 rounded-full bg-red-600"></span>
+                    <span class="text-red-700 text-xs font-bold uppercase tracking-wider">Only 5 new clients this month</span>
+                </div>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 leading-tight">
+                Elite <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-500">Commission Reps.</span><br>Only Pay When You Close.
+            </h1>
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                We embed pre-vetted SaaS closers directly into your business. They only earn when you make money. <span class="font-bold text-gray-900 underline decoration-amber-500/30">Limited spots for Q1 onboarding remaining.</span>
+            </p>
+            <div class="flex flex-col items-center space-y-4">
+                <button onclick="openQuiz()" class="bg-amber-600 hover:bg-amber-700 text-white text-lg px-10 py-5 rounded-xl font-bold shadow-lg shadow-amber-600/30 transform hover:-translate-y-1 transition-all w-full sm:w-auto">
+                    Take the 60-Second Sales Audit
+                </button>
+                <p class="text-sm text-gray-500 font-medium">No commitment. Qualify for a 15-minute strategy call.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ONBOARDING ROADMAP SECTION -->
+    <section id="how-it-works" class="py-24 bg-white border-y border-gray-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl italic">The 21-Day Revenue Roadmap</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">We don't just "send you reps," we build the entire engine required for them to actually close deals.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- STEP 1 -->
+                <div class="roadmap-card bg-[#F9F9F7] p-8 rounded-3xl border border-gray-100 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center text-2xl font-bold">01</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Audit & Strategy</h3>
+                                <p class="text-amber-600 font-bold text-xs uppercase tracking-widest">Days 1–4</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6 flex-grow">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">🔍</span> Pipeline Friction Audit
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">We dissect your current funnel to uncover bottlenecks and missed revenue.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Lead quality analysis</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Conversion mapping</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Show-rate diagnostics</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Sales cycle breakdown</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Revenue Leak Map</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ KPI baseline tracking</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">💰</span> Custom Incentive Mapping
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">We design a commission structure that drives profitable behavior.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Tiered commissions</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Revenue accelerators</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Margin protection</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Performance bonuses</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Outcome</p>
+                        <p class="text-sm text-gray-900 font-bold">Clear visibility on growth blockers and reps aligned with revenue — not just activity.</p>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="roadmap-card bg-[#F9F9F7] p-8 rounded-3xl border border-gray-100 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-amber-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold">02</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Systems Injection</h3>
+                                <p class="text-amber-600 font-bold text-xs uppercase tracking-widest">Days 5–12</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6 flex-grow">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">📝</span> Dynamic Script Development
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">Structured conversations engineered to convert with founder-level authority.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Discovery frameworks</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Objection reframes</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Urgency triggers</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Multiple close paths</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">⚙️</span> CRM Automation & Workflows
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">We eliminate admin drag and automate follow-up precision.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Automated follow-ups</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ No-show recovery</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Proposal reminders</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ 24h response tracking</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Outcome</p>
+                        <p class="text-sm text-gray-900 font-bold">A system where reps sell with clarity and no opportunity slips through the cracks.</p>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="roadmap-card bg-[#F9F9F7] p-8 rounded-3xl border border-gray-100 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-amber-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold">03</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Rep Deployment</h3>
+                                <p class="text-amber-600 font-bold text-xs uppercase tracking-widest">Days 13–18</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6 flex-grow">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">🎯</span> Intensive Product Immersion
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">Reps must understand your product at founder depth before talking to leads.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Offer breakdown</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Competitor positioning</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Case study mastery</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Mock demos</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">🎭</span> Roleplay & Objection Training
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-4">Reps are stress-tested against real resistance before going live.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Price resistance</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Budget objections</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Competitor comparisons</span>
+                                <span class="bg-white p-2 rounded border border-gray-200">✓ Authority challenges</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Outcome</p>
+                        <p class="text-sm text-gray-900 font-bold">Confident, vetted closers who have earned the right to represent your brand.</p>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="roadmap-card bg-amber-50 p-8 rounded-3xl border border-amber-100 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-green-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold">04</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 leading-tight">The Scale Loop</h3>
+                                <p class="text-green-600 font-bold text-xs uppercase tracking-widest">Day 19 & Beyond</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6 flex-grow">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">👀</span> Live Optimization
+                            </h4>
+                            <div class="grid grid-cols-1 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Daily call reviews & shadowing</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Tone & authority calibration</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Missed-close diagnostics</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ 24h lead response monitoring</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                <span class="mr-2">📈</span> Conversion Optimization
+                            </h4>
+                            <div class="grid grid-cols-1 gap-2 text-xs font-medium text-gray-700">
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Weekly KPI analysis</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Objection trend mapping</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Script evolution</span>
+                                <span class="bg-white p-2 rounded border border-amber-100">✓ Incentive recalibration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-amber-200">
+                        <p class="text-xs font-bold text-amber-600 uppercase tracking-tighter">Outcome</p>
+                        <p class="text-sm text-gray-900 font-bold">A compounding revenue engine — moving from working results to scaled growth.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROI SIMULATOR SECTION -->
+    <section id="roi-simulator" class="py-24 bg-[#F9F9F7]">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quantify Your Opportunity</h2>
+                    <p class="text-gray-600 text-lg mb-8">Estimate the revenue impact of implementing our commission-based team.</p>
+                    <div class="space-y-8 bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                        <div>
+                            <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Monthly Leads</label><span id="val-leads" class="text-amber-600 font-bold">50</span></div>
+                            <input type="range" id="input-leads" min="10" max="500" step="10" value="50">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Contract Value ($)</label><span id="val-acv" class="text-amber-600 font-bold">$5,000</span></div>
+                            <input type="range" id="input-acv" min="1000" max="50000" step="500" value="5000">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Current Close Rate (%)</label><span id="val-rate" class="text-amber-600 font-bold">12%</span></div>
+                            <input type="range" id="input-rate" min="1" max="50" step="1" value="12">
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                    <p class="text-sm text-gray-500 uppercase tracking-widest">Projected Monthly Revenue</p>
+                    <h3 class="text-5xl font-extrabold text-gray-900 mt-2" id="projected-revenue">$0</h3>
+                    <p class="text-green-600 font-medium mt-1">+$<span id="revenue-lift">0</span>/mo lift</p>
+                    <div class="chart-container mt-8">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS SECTION -->
+    <section id="testimonials" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">Trusted by SaaS Founders</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="testimonial-grid">
+                <!-- Card 1 -->
+                <div class="p-8 bg-[#F9F9F7] rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+                    <p class="text-gray-600 italic mb-6">"We were struggling to grow sales without adding staff. RepMatch provided top-tier, commission-only reps who hit the ground running. Our sales pipeline has never been stronger!"</p>
+                    <div class="mt-auto">
+                        <p class="font-bold text-gray-900 text-lg">Deepak S.</p>
+                        <p class="text-sm text-amber-600 font-bold">Founder, Pearl Lemon Group</p>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="p-8 bg-[#F9F9F7] rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+                    <p class="text-gray-600 italic mb-6">"The results speak for themselves: RepMatch reps delivered measurable growth in weeks, not months. No salaries, no risk, just fast, reliable sales. This is how you scale smart."</p>
+                    <div class="mt-auto">
+                        <p class="font-bold text-gray-900 text-lg">Alex N.</p>
+                        <p class="text-sm text-amber-600 font-bold">Sales Director, Omnyra.ai</p>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="p-8 bg-[#F9F9F7] rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+                    <p class="text-gray-600 italic mb-6">"They didn't just provide reps; they built a high-performance system that actually converts. We've seen a massive shift in our sales efficiency since onboarding."</p>
+                    <div class="mt-auto">
+                        <p class="font-bold text-gray-900 text-lg">David K.</p>
+                        <p class="text-sm text-amber-600 font-bold">Head of Sales Development, Lighthouse Marketing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-24 bg-[#F9F9F7]">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">Frequently Asked Questions</h2>
+                <p class="mt-4 text-gray-600">Everything you need to know about scaling your sales team with Repmatch.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">How many reps will I get?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">We typically start with 1-2 reps to dial in the conversion process and prove ROI. Once we hit your target close rate (usually 15-25% depending on your offer), we scale the team based on your lead volume. Most clients run 2-5 reps within 90 days.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">What industries do you work with?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">We specialize in B2B SaaS, software, and high-ticket services ($3K-$50K+ contracts). Our reps have closed deals in marketing agencies, AI tools, data platforms, consulting, and enterprise software. If you have a complex sale with a defined sales process, we can help.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">How long until we see results?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">Most clients see their first closed deals within 21-30 days. Week 1-2 is infrastructure setup (scripts, CRM, training). Week 3-4 is when reps start taking calls. By month 2, you should be seeing consistent pipeline growth. We track leading indicators (calls booked, show rates) from day one so you know it's working before revenue hits.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">How much does this cost? What's the commission structure?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">We charge a one-time upfront setup fee to build your sales infrastructure (scripts, CRM workflows, rep training), plus a small monthly service fee for ongoing management and QA. Your reps work on commission-only (typically 10-20% of closed deals), so you're never paying salaries. The exact commission structure is customized during your strategy call based on your contract value and margins - designed to attract elite closers while keeping your economics profitable.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">What if the reps don't perform or aren't a good fit?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">We have a 30-day performance guarantee. If your rep isn't hitting the agreed KPIs (call volume, show rates, or conversion benchmarks), we'll replace them at no cost. We also provide daily QA reviews to catch issues early. Our reps are pre-vetted with proven track records - they only eat what they kill, so they're highly motivated to perform.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 6 -->
+                <div class="faq-item bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-6 text-left group">
+                        <span class="text-lg font-bold text-gray-900 group-hover:text-amber-600 transition-colors">What tools/CRM do I need?</span>
+                        <svg class="faq-icon w-6 h-6 transition-transform text-gray-400 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer px-6">
+                        <p class="text-gray-600 leading-relaxed">We work with most major CRMs (HubSpot, Salesforce, Pipedrive, GoHighLevel). If you don't have one, we'll recommend affordable options. You'll also need basic video conferencing (Zoom/Teams) and a dialer if doing outbound. We integrate seamlessly with your existing tech stack.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center">
+                <button onclick="openBooking()" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-amber-600/20">
+                    Still have questions? Let's talk.
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-950 py-12 text-center text-gray-500 text-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="mb-4">© 2026 Repmatch. The Commission-Only Sales Engine for SaaS.</p>
+            <div class="flex justify-center space-x-6">
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                <a href="mailto:hello@repmatch.com" class="hover:text-white transition-colors">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL (QUIZ & BOOKING) -->
+    <div id="app-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-10">
+            <button onclick="closeModal()" class="absolute top-4 right-6 text-3xl text-gray-400 hover:text-gray-600 z-50">&times;</button>
+            
+            <div id="quiz-container" class="w-full">
+                <form id="audit-form" action="https://formspree.io/f/mqakeonq" method="POST">
+                    
+                    <!-- STEP 1: INDUSTRY -->
+                    <div id="step-1" class="quiz-step active text-center">
+                        <span class="text-amber-600 font-bold text-sm uppercase tracking-widest mb-2 block">Step 1 of 5</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">What is your primary industry?</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="B2B SaaS" class="hidden peer" required onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">B2B SaaS / Software</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="Marketing Agency" class="hidden peer" onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">Marketing Agency</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="Consulting" class="hidden peer" onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">Consulting / Coaching</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="E-learning" class="hidden peer" onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">E-learning / Course</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="AI Services" class="hidden peer" onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">AI / Data Services</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="industry" value="Other" class="hidden peer" onchange="nextStep(2)">
+                                <div class="peer-checked:font-bold">Other High-Ticket B2B</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: REVENUE -->
+                    <div id="step-2" class="quiz-step text-center">
+                        <span class="text-amber-600 font-bold text-sm uppercase tracking-widest mb-2 block">Step 2 of 5</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Current Monthly Revenue?</h3>
+                        <div class="grid grid-cols-1 gap-3 text-left">
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="revenue" value="Under $10k" class="hidden peer" required onchange="nextStep(3)">
+                                <div class="peer-checked:font-bold">Starting Out (Under $10k)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="revenue" value="$10k-$30k" class="hidden peer" onchange="nextStep(3)">
+                                <div class="peer-checked:font-bold">Early Growth ($10k - $30k)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="revenue" value="$30k-$100k" class="hidden peer" onchange="nextStep(3)">
+                                <div class="peer-checked:font-bold">Scaling ($30k - $100k)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="revenue" value="$100k+" class="hidden peer" onchange="nextStep(3)">
+                                <div class="peer-checked:font-bold">Enterprise / Mature ($100k+)</div>
+                            </label>
+                        </div>
+                        <button type="button" onclick="nextStep(1)" class="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 flex items-center justify-center mx-auto">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> Back
+                        </button>
+                    </div>
+
+                    <!-- STEP 3: INFRASTRUCTURE -->
+                    <div id="step-3" class="quiz-step text-center">
+                        <span class="text-amber-600 font-bold text-sm uppercase tracking-widest mb-2 block">Step 3 of 5</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Current Sales Infrastructure?</h3>
+                        <div class="grid grid-cols-1 gap-3 text-left">
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="process" value="Zero" class="hidden peer" required onchange="nextStep(4)">
+                                <div class="peer-checked:font-bold">Founder selling only (No scripts)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="process" value="Partial" class="hidden peer" onchange="nextStep(4)">
+                                <div class="peer-checked:font-bold">Some scripts & CRM (Basic)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="process" value="Built" class="hidden peer" onchange="nextStep(4)">
+                                <div class="peer-checked:font-bold">Full system (Vetted scripts & CRM)</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="process" value="Scaling" class="hidden peer" onchange="nextStep(4)">
+                                <div class="peer-checked:font-bold">Existing team needs better reps</div>
+                            </label>
+                        </div>
+                        <button type="button" onclick="nextStep(2)" class="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 flex items-center justify-center mx-auto">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> Back
+                        </button>
+                    </div>
+
+                    <!-- STEP 4: TICKET PRICE -->
+                    <div id="step-4" class="quiz-step text-center">
+                        <span class="text-amber-600 font-bold text-sm uppercase tracking-widest mb-2 block">Step 4 of 5</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Average Contract Value?</h3>
+                        <div class="grid grid-cols-1 gap-3 text-left">
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="acv" value="Low" class="hidden peer" required onchange="nextStep(5)">
+                                <div class="peer-checked:font-bold">Under $1,500</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="acv" value="Mid" class="hidden peer" onchange="nextStep(5)">
+                                <div class="peer-checked:font-bold">$1,500 - $5,000</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="acv" value="High" class="hidden peer" onchange="nextStep(5)">
+                                <div class="peer-checked:font-bold">$5,000 - $15,000</div>
+                            </label>
+                            <label class="quiz-option p-4 rounded-xl cursor-pointer flex items-center">
+                                <input type="radio" name="acv" value="Enterprise" class="hidden peer" onchange="nextStep(5)">
+                                <div class="peer-checked:font-bold">$15,000+</div>
+                            </label>
+                        </div>
+                        <button type="button" onclick="nextStep(3)" class="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 flex items-center justify-center mx-auto">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> Back
+                        </button>
+                    </div>
+
+                    <!-- STEP 5: FINAL INFO -->
+                    <div id="step-5" class="quiz-step text-center">
+                        <span class="text-amber-600 font-bold text-sm uppercase tracking-widest mb-2 block">Step 5 of 5</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Final Step!</h3>
+                        <p class="text-gray-500 mb-8 text-sm">Where should we send your Sales Audit Results?</p>
+                        <div class="space-y-4 text-left">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Your Name</label>
+                                <input type="text" name="name" placeholder="John Doe" class="w-full p-4 rounded-xl border border-gray-200 focus:border-amber-600 outline-none transition-all" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Work Email</label>
+                                <input type="email" name="email" placeholder="john@company.com" class="w-full p-4 rounded-xl border border-gray-200 focus:border-amber-600 outline-none transition-all" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-8 w-full bg-amber-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-amber-600/30">
+                            View Calendar & Analysis
+                        </button>
+                        <button type="button" onclick="nextStep(4)" class="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 flex items-center justify-center mx-auto">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> Back
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="booking-container" class="hidden w-full h-full flex flex-col items-center">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Analysis Complete!</h3>
+                    <p class="text-amber-600 font-semibold">You qualify for a Strategy Call.</p>
+                </div>
+                <div class="calendar-wrapper w-full bg-gray-50">
+                    <iframe src="https://repmatch.youcanbook.me/?embed=true" width="100%" height="100%" frameborder="0" style="min-height: 550px;"></iframe>
+                </div>
+            </div>
+
+            <div id="loading-state" class="hidden text-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                <p class="text-gray-600 font-medium">Processing your data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let roiChart;
+
+        function openModal() {
+            const m = document.getElementById('app-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const m = document.getElementById('app-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function openQuiz() {
+            openModal();
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('booking-container').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            nextStep(1);
+        }
+
+        function openBooking() {
+            openModal();
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('booking-container').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+
+        function nextStep(step) {
+            const steps = document.querySelectorAll('.quiz-step');
+            const targetStep = document.getElementById('step-' + step);
+            if (targetStep) {
+                steps.forEach(s => s.classList.remove('active'));
+                targetStep.classList.add('active');
+            }
+        }
+
+        function toggleFaq(btn) {
+            const item = btn.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // Close all others
+            document.querySelectorAll('.faq-item').forEach(i => {
+                i.classList.remove('active');
+            });
+            
+            // Toggle current
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        }
+
+        document.getElementById('audit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            
+            fetch(this.action, {
+                method: this.method,
+                body: new FormData(this),
+                headers: { 'Accept': 'application/json' }
+            }).finally(() => {
+                setTimeout(() => {
+                    document.getElementById('loading-state').classList.add('hidden');
+                    document.getElementById('booking-container').classList.remove('hidden');
+                }, 1000);
+            });
+        });
+
+        function updateROI() {
+            const leads = parseInt(document.getElementById('input-leads').value);
+            const acv = parseInt(document.getElementById('input-acv').value);
+            const rate = parseInt(document.getElementById('input-rate').value);
+
+            document.getElementById('val-leads').innerText = leads;
+            document.getElementById('val-acv').innerText = '$' + acv.toLocaleString();
+            document.getElementById('val-rate').innerText = rate + '%';
+
+            const currRevenue = leads * (rate / 100) * acv;
+            // Repmatch logic: improve conversion by at least 1.6x or floor it at 22% for SaaS
+            const optimizedRate = Math.min(Math.max(rate + 10, rate * 1.6, 22), 50); 
+            const projectedRevenue = leads * (optimizedRate / 100) * acv;
+
+            document.getElementById('projected-revenue').innerText = '$' + Math.round(projectedRevenue).toLocaleString();
+            document.getElementById('revenue-lift').innerText = Math.round(projectedRevenue - currRevenue).toLocaleString();
+            
+            if (roiChart) {
+                roiChart.data.datasets[0].data = [currRevenue, projectedRevenue];
+                roiChart.update();
+            }
+        }
+
+        window.onload = function() {
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            roiChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Current', 'With Repmatch'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#E5E7EB', '#D97706'],
+                        borderRadius: 8
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { 
+                                callback: (v) => '$' + (v >= 1000 ? v/1000 + 'k' : v)
+                            } 
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+            updateROI();
+            ['input-leads', 'input-acv', 'input-rate'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateROI);
+            });
+        };
+    </script>
+</body>
+</html>
